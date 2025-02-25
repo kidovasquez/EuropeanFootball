@@ -1,0 +1,69 @@
+{
+	"name": "df_to_create_leagues",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_csv_file",
+						"type": "DatasetReference"
+					},
+					"name": "combinedcsvfile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_parquet_files",
+						"type": "DatasetReference"
+					},
+					"name": "partitionedparquetfiles"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumnfordate",
+					"description": "Updates the date from dd/MM/yy format to yyyy-MM-dd"
+				},
+				{
+					"name": "casttoInteger",
+					"description": "Cast goals to integer"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          League as string,",
+				"          Date as string,",
+				"          HomeTeam as string,",
+				"          AwayTeam as string,",
+				"          HomeGoals as string,",
+				"          AwayGoals as string,",
+				"          Result as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> combinedcsvfile",
+				"combinedcsvfile derive(Date = toDate(Date,'dd/MM/yy','yyyy-MM-dd')) ~> derivedColumnfordate",
+				"derivedColumnfordate cast(output(",
+				"          HomeGoals as integer,",
+				"          AwayGoals as integer",
+				"     ),",
+				"     errors: true) ~> casttoInteger",
+				"casttoInteger sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          0,",
+				"          League",
+				"     )) ~> partitionedparquetfiles"
+			]
+		}
+	}
+}
