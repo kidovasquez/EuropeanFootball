@@ -1,0 +1,596 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ef-adf"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://efsa.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_all_files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"compressionCodec": null,
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_csv_file')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"File_Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().File_Name",
+							"type": "Expression"
+						},
+						"folderPath": "archive.zip",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "League",
+						"type": "String"
+					},
+					{
+						"name": "Date",
+						"type": "String"
+					},
+					{
+						"name": "HomeTeam",
+						"type": "String"
+					},
+					{
+						"name": "AwayTeam",
+						"type": "String"
+					},
+					{
+						"name": "HomeGoals",
+						"type": "String"
+					},
+					{
+						"name": "AwayGoals",
+						"type": "String"
+					},
+					{
+						"name": "Result",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_individual_files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"File_Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().File_Name",
+							"type": "Expression"
+						},
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "League",
+						"type": "String"
+					},
+					{
+						"name": "Date",
+						"type": "String"
+					},
+					{
+						"name": "HomeTeam",
+						"type": "String"
+					},
+					{
+						"name": "AwayTeam",
+						"type": "String"
+					},
+					{
+						"name": "HomeGoals",
+						"type": "String"
+					},
+					{
+						"name": "AwayGoals",
+						"type": "String"
+					},
+					{
+						"name": "Result",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_parquet_files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "silver"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_zip_file')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "archive.zip",
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"compressionCodec": "ZipDeflate",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "PK\u0003\u0004-\u0000\u0000\b\b\u0000��GZ�\b\u0010���������\u0010\u0000\u0014\u0000Bundesliga 2.csv\u0001\u0000\u0010\u0000��\u0007\u0000\u0000\u0000\u0000\u0000�\u0013\u0001\u0000\u0000\u0000\u0000\u0000�K�%G�%��_���$��q\u001fq����գ��FU�4л�t�\u0019�Td!2c\u001a�~�\u0017~�H\u001e��0�'\u0004\bH\\�\t7#\u000f\u001fF����z�������_�o�����?����������?�_�����/��ڿ�z������������O\u000f\u001f��",
+						"type": "String"
+					},
+					{
+						"name": "o��\u000f��\u000f�����?>~��ק�?�?}������v~7��^���@�\u000e���ׯ?>y����_�~��z}z��ۥ@����O�o�������ϟ�~�!�\u0004�o����������ͷקO\u000f��Ԧ�\u000f��\u0006����|������ߵ�M�!�\u0004���?<���_���_?������׏o��1����������ۿ_�~~x�pmO���c\u0000���_����ׯ��/?}�>�\u001cIL\u0000�_�������������ˋ�n��Yѹ�h�",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/P1_Unzip_to_Raw')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Zip file and Unzip",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings",
+									"compressionProperties": {
+										"type": "ZipDeflateReadSettings"
+									}
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_zip_file",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_all_files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-02-17T08:25:07Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_zip_file')]",
+				"[concat(variables('factoryId'), '/datasets/ds_all_files')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_to_create_leagues')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_csv_file",
+								"type": "DatasetReference"
+							},
+							"name": "combinedcsvfile"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_parquet_files",
+								"type": "DatasetReference"
+							},
+							"name": "partitionedparquetfiles"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumnfordate",
+							"description": "Updates the date from dd/MM/yy format to yyyy-MM-dd"
+						},
+						{
+							"name": "casttoInteger",
+							"description": "Cast goals to integer"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          League as string,",
+						"          Date as string,",
+						"          HomeTeam as string,",
+						"          AwayTeam as string,",
+						"          HomeGoals as string,",
+						"          AwayGoals as string,",
+						"          Result as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> combinedcsvfile",
+						"combinedcsvfile derive(Date = toDate(Date,'dd/MM/yy','yyyy-MM-dd')) ~> derivedColumnfordate",
+						"derivedColumnfordate cast(output(",
+						"          HomeGoals as integer,",
+						"          AwayGoals as integer",
+						"     ),",
+						"     errors: true) ~> casttoInteger",
+						"casttoInteger sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          League",
+						"     )) ~> partitionedparquetfiles"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_csv_file')]",
+				"[concat(variables('factoryId'), '/datasets/ds_parquet_files')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/P2_to_create_leagues')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get All Files in Raw",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_all_files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach File",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get All Files in Raw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get All Files in Raw').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Get Individual Files",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_individual_files",
+											"type": "DatasetReference",
+											"parameters": {
+												"File_Name": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"childItems"
+										],
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "Filter to get combined csv file",
+									"type": "Filter",
+									"dependsOn": [
+										{
+											"activity": "Get Individual Files",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"items": {
+											"value": "@activity('Get Individual Files').output.childItems",
+											"type": "Expression"
+										},
+										"condition": {
+											"value": "@equals(item().name, 'combined_matches.csv')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "df_create_league_files",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "Filter to get combined csv file",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "df_to_create_leagues",
+											"type": "DataFlowReference",
+											"parameters": {},
+											"datasetParameters": {
+												"combinedcsvfile": {
+													"File_Name": {
+														"value": "activity('Filter to get combined csv file').output",
+														"type": "Expression"
+													}
+												},
+												"partitionedparquetfiles": {}
+											}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"File_Names": {
+						"type": "Array"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-02-25T07:01:45Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_all_files')]",
+				"[concat(variables('factoryId'), '/datasets/ds_individual_files')]",
+				"[concat(variables('factoryId'), '/dataflows/df_to_create_leagues')]"
+			]
+		}
+	]
+}
